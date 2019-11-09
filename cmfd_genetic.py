@@ -30,7 +30,7 @@ for index_dis, key_desc_dis in enumerate(descriptors):  # dist = numpy.linalg.no
 
         dist = np.linalg.norm(key_desc_dis - descriptors[index_ic])
 
-        if dist < 150:
+        if dist < 200:
             cv.circle(img_rgb, (round(keypoints_sift[index_dis].pt[0]), round(keypoints_sift[index_dis].pt[1])), 4,
                       (0, 0, 255),
                       -1)  # eslesen objeyi isaretlemek icin

@@ -1,9 +1,9 @@
 import cv2 as cv
 import numpy as np
-from scipy.spatial import distance
 
-img_gray = cv.imread("im49_t.bmp", cv.IMREAD_GRAYSCALE)
-img_rgb = cv.imread("im49_t.bmp", cv.IMREAD_COLOR)
+
+img_gray = cv.imread("im41_t.bmp", cv.IMREAD_GRAYSCALE)
+img_rgb = cv.imread("im41_t.bmp", cv.IMREAD_COLOR)
 
 img_gray = cv.resize(img_gray, (int(img_gray.shape[1] * 40 / 100), int(img_gray.shape[0] * 40 / 100)))
 img_rgb = cv.resize(img_rgb, (int(img_rgb.shape[1] * 40 / 100), int(img_rgb.shape[0] * 40 / 100)))

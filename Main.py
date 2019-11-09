@@ -8,12 +8,19 @@ img_rgb = cv.imread("im41_t.bmp", cv.IMREAD_COLOR)
 
 siftmach = SiftMach.SiftMach(150, 40)
 
-df = pd.read_excel("masks.xlsx", index_col=0)
-print(df)
+df = pd.read_excel("masks.xlsx")
 
-x = siftmach.apply_sift(img_gray, img_rgb)
-print(x)
-print(df.columns)
+read_matrix = df[['mask']].to_numpy()
+
+filter = read_matrix[0][0]
+filter1 = read_matrix[1][0]
+
+print(np.matrix(filter))
+
+print(np.matrix(filter1))
+
+#x = siftmach.apply_sift(img_gray, img_rgb)
+#print(x)
 
 cv.waitKey(0)
 cv.destroyAllWindows()

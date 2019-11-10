@@ -1,19 +1,22 @@
 import SiftMach
+import Genetic
 import cv2 as cv
 import numpy as np
 import pandas as pd
 
-img_gray = cv.imread("im41_t.bmp", cv.IMREAD_GRAYSCALE)
-img_rgb = cv.imread("im41_t.bmp", cv.IMREAD_COLOR)
+img_gray = cv.imread("im48_t.bmp", cv.IMREAD_GRAYSCALE)
+img_rgb = cv.imread("im48_t.bmp", cv.IMREAD_COLOR)
 
-siftmach = SiftMach.SiftMach(150, 40)
+df = pd.read_csv('masks_backup.csv', sep=';', index_col=['id'])
 
-df = pd.read_excel("masks.xlsx", index_col=0)
-print(df)
+siftmach_class = SiftMach.SiftMach(150, 40)
+genetic_class = Genetic.Genetic(3, df)
 
-x = siftmach.apply_sift(img_gray, img_rgb)
-print(x)
-print(df.columns)
+for index, gen_mask in enumerate(genetic_class.get_generation()):
+    destination_gray_img = cv.filter2D(img_gray, -1, gen_mask)
+    x = siftmach_class.apply_sift(destination_gray_img, img_rgb)
+    cv.imshow("mask: " + str(index), destination_gray_img)
+    print("index: {} →→ eslesen {} nokta".format(index + 1, x))
 
 cv.waitKey(0)
 cv.destroyAllWindows()

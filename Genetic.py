@@ -1,5 +1,5 @@
 import numpy as np
-
+import pandas as pd
 
 class Genetic:
 
@@ -7,8 +7,9 @@ class Genetic:
         self.number_of_generations = number_of_generations
         self.actual_dataFrame = df
         self.cursor = 1
-        df.to_csv('mask.csv', sep=';', encoding='utf-8')
-
+        self.outfile = open('mask.csv')
+        df.to_csv('mask.csv', encoding='utf-8')
+        self.outfile.close()
     def get_generation(self):
         df = self.actual_dataFrame
         mask_array_string = df[df.generation == self.cursor & df.selection]['mask']
@@ -24,7 +25,6 @@ class Genetic:
         return df.index[df.generation == self.cursor & df.selection].tolist()
 
     def generate_new_population(self):
-        self.cursor += 1
         ayni_boyut_varmi = False
         df = self.actual_dataFrame
         for index_dis, gen_mask_dis in enumerate(self.get_generation()):
@@ -36,10 +36,17 @@ class Genetic:
                         ayni_boyut_varmi = True
                         new_gen = np.multiply(gen_mask_ic, gen_mask_dis)
                         new_gen /= new_gen.sum(axis=1)[:, np.newaxis]  # normalize
-                        df = df.append({'mask': self.matrix_to_string(new_gen), 'generation': self.cursor,
+                        print("new gen {}".format(new_gen))
+                        df = df.append({'mask': self.matrix_to_string(new_gen),
+                                        'generation': self.cursor+1,
                                         'match': 0, 'selection': True}, ignore_index=True)
+
         if ayni_boyut_varmi:
+            self.cursor += 1
+            print('cursor: {} --- new dataframe:  {}'.format(self.cursor, df))
             df.to_csv('mask.csv', sep=';', encoding='utf-8')
+            self.outfile.close()
+
         return ayni_boyut_varmi
 
     def selection(self):
@@ -51,7 +58,8 @@ class Genetic:
         else:
             df.loc[df['match'] < matched.mean(), "selection"] = False
             df.to_csv('mask.csv', sep=';', encoding='utf-8')
-            return False
+            self.outfile.close()
+            return True
 
     def string_to_matrix(self, str_):
         if str_.count(',') == 8:

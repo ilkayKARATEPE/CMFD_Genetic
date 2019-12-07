@@ -36,6 +36,5 @@ print(best_mask)
 destination_gray_img = cv.filter2D(img_gray, -1, best_mask)
 siftmach_class.apply_sift_final(destination_gray_img, img_rgb)
 
-
 cv.waitKey(0)
 cv.destroyAllWindows()

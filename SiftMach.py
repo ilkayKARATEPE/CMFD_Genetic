@@ -35,7 +35,7 @@ class SiftMach:
 
                 if dist < self.dist:
                     eslesen_keypoint += 1
-
+#ransac kullanılabilir
         return eslesen_keypoint
 
     def apply_sift_final(self, img_gray, img_rgb):

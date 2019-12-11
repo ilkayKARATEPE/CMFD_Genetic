@@ -1,5 +1,7 @@
+import os
+
 import numpy as np
-import pandas as pd
+
 
 class Genetic:
 
@@ -7,12 +9,18 @@ class Genetic:
         self.number_of_generations = number_of_generations
         self.actual_dataFrame = df
         self.cursor = 1
-        self.outfile = open('mask.csv')
-        df.to_csv('mask.csv', encoding='utf-8')
-        self.outfile.close()
+        # df.to_csv('mask.csv', encoding='utf-8')
+        if not os.path.isfile('filename.csv'):
+            df.to_csv('mask.csv', header='column_names', sep=';', encoding='utf-8')  ####
+        else:
+            df.to_csv('mask.csv', mode='w', header=False, sep=';', encoding='utf-8')  ####
+
+    # -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+    ###  Genetic Algorithm  ###
+    ###########################
     def get_generation(self):
-        df = self.actual_dataFrame
-        mask_array_string = df[df.generation == self.cursor & df.selection]['mask']
+        mask_array_string = self.actual_dataFrame[self.actual_dataFrame.generation == self.cursor & self.actual_dataFrame.selection][
+            'mask']
         arr = []
 
         for sub_array in mask_array_string:
@@ -20,47 +28,56 @@ class Genetic:
 
         return arr
 
+    # ------------------
     def get_actual_generation_index(self):
-        df = self.actual_dataFrame
-        return df.index[df.generation == self.cursor & df.selection].tolist()
+        return self.actual_dataFrame.index[
+            self.actual_dataFrame.generation == self.cursor & self.actual_dataFrame.selection].tolist()
 
+    # ------------------
+    def crossing_over(self, A, B):
+        new_gen = np.subtract(A, B)
+        # new_gen = np.multiply(A, B)
+        new_gen /= new_gen.sum(axis=1)[:, np.newaxis]  # normalize
+        return np.round(new_gen, 2)
+
+    # ------------------
     def generate_new_population(self):
-        ayni_boyut_varmi = False
-        df = self.actual_dataFrame
-        for index_dis, gen_mask_dis in enumerate(self.get_generation()):
-            for index_ic, gen_mask_ic in enumerate(self.get_generation()):
-                if index_ic == index_dis:
-                    continue
-                else:
-                    if gen_mask_dis.shape == gen_mask_ic.shape:
-                        ayni_boyut_varmi = True
-                        new_gen = np.multiply(gen_mask_ic, gen_mask_dis)
-                        new_gen /= new_gen.sum(axis=1)[:, np.newaxis]  # normalize
-                        print("new gen {}".format(new_gen))
-                        df = df.append({'mask': self.matrix_to_string(new_gen),
-                                        'generation': self.cursor+1,
-                                        'match': 0, 'selection': True}, ignore_index=True)
+        if self.number_of_generations == self.cursor:
+            return False
 
-        if ayni_boyut_varmi:
+        global same_dimension
+        same_dimension = True
+        get_gen = self.get_generation()
+        for index_dis, gen_mask_dis in enumerate(get_gen):
+            for index_ic in range(index_dis + 1, len(get_gen)):
+                if gen_mask_dis.shape == get_gen[index_ic].shape:
+                    same_dimension = True
+                    new_gen = self.crossing_over(get_gen[index_ic], gen_mask_dis)
+                    self.actual_dataFrame = self.actual_dataFrame.append({'mask': self.matrix_to_string(new_gen),
+                                                                          'generation': self.cursor + 1,
+                                                                          'match': 0, 'selection': True},
+                                                                         ignore_index=True)
+
+        if same_dimension:
             self.cursor += 1
-            print('cursor: {} --- new dataframe:  {}'.format(self.cursor, df))
-            df.to_csv('mask.csv', sep=';', encoding='utf-8')
-            self.outfile.close()
+            self.actual_dataFrame.to_csv('mask.csv', mode='w', header='column_names', sep=';', encoding='utf-8',
+                                         index=True, index_label='id')  ####
 
-        return ayni_boyut_varmi
+        return same_dimension
 
+    # ------------------
     def selection(self):
-        df = self.actual_dataFrame
-        matched = df[df.generation == self.cursor & df.selection]['match']
-        print(matched)
+        matched = self.actual_dataFrame[self.actual_dataFrame.generation == self.cursor & self.actual_dataFrame.selection]['match']
         if matched.mean() < 5:
             return False
         else:
-            df.loc[df['match'] < matched.mean(), "selection"] = False
-            df.to_csv('mask.csv', sep=';', encoding='utf-8')
-            self.outfile.close()
+            self.actual_dataFrame.loc[self.actual_dataFrame['match'] < matched.mean(), "selection"] = False
+            self.actual_dataFrame.to_csv('mask.csv', mode='w', header='column_names', sep=';', encoding='utf-8',
+                      index=True, index_label='id')  ####
+
             return True
 
+    #### Matrix Operations ###
     def string_to_matrix(self, str_):
         if str_.count(',') == 8:
             return np.array(list(map(float, str_.split(',')))).reshape(3, 3)
@@ -71,6 +88,7 @@ class Genetic:
         elif str_.count(',') == 48:
             return np.array(list(map(float, str_.split(',')))).reshape(7, 7)
 
+    # ------------------
     def matrix_to_string(self, matrix):
         b = ''
         for i in range(0, matrix.shape[0]):

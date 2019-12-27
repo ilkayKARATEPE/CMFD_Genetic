@@ -4,17 +4,17 @@ import pandas as pd
 import Genetic
 import SiftMach
 
-img_gray = cv.imread("im11_t.bmp", cv.IMREAD_GRAYSCALE)
-img_rgb = cv.imread("im11_t.bmp", cv.IMREAD_COLOR)
+img_gray = cv.imread("TP_C01_019_copy.png", cv.IMREAD_GRAYSCALE)
+img_rgb = cv.imread("TP_C01_019_copy.png", cv.IMREAD_COLOR)
+
+# alpha = .2
+# beta = 25
+# img_gray = cv.convertScaleAbs(img_gray, alpha=alpha, beta=beta)
+
 df = pd.read_csv('masks_backup.csv', sep=';', index_col=['id'])
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-df = pd.read_excel("masks.xlsx")
-=======
 siftmach_class = SiftMach.SiftMach(150, 40)
 genetic_class = Genetic.Genetic(3, df)
->>>>>>> master
 
 while True:
     for index, gen_mask in enumerate(genetic_class.get_generation()):
@@ -37,27 +37,12 @@ while True:
     print('--------------------------------')
 
 
-<<<<<<< HEAD
-#x = siftmach.apply_sift(img_gray, img_rgb)
-#print(x)
-=======
-siftmach_class = SiftMach.SiftMach(150, 40)
-genetic_class = Genetic.Genetic(3, df)
-
-for index, gen_mask in enumerate(genetic_class.get_generation()):
-    destination_gray_img = cv.filter2D(img_gray, -1, gen_mask)
-    x = siftmach_class.apply_sift(destination_gray_img, img_rgb)
-    cv.imshow("mask: " + str(index), destination_gray_img)
-    print("index: {} →→ eslesen {} nokta".format(index + 1, x))
->>>>>>> master
-=======
 df_final = pd.read_csv('mask.csv', sep=';', index_col=['id'])
 best_mask = genetic_class.string_to_matrix(df_final.iloc[df_final['match'].idxmax()]['mask'])
 print(best_mask)
 
 destination_gray_img = cv.filter2D(img_gray, -1, best_mask)
 siftmach_class.apply_sift_final(destination_gray_img, img_rgb)
->>>>>>> master
 
 cv.waitKey(0)
 cv.destroyAllWindows()
